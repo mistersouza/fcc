@@ -27,19 +27,6 @@ app.get('/api/hello', function(req, res) {
 });
 
 let Url = require('./models/url');
-let counter = 1;
-
-const initCounter = async () => {
-  try {
-    const latestUrlEntry = await Url.findOne().sort({ shortUrl: -1 }).limit(1);
-    if (latestUrlEntry) counter = latestUrlEntry.shortUrl + 1;
-  } catch (error) {
-    console.error('Error initializing counter', error);
-    
-  }
-}
-
-initCounter()
 
 app.post('/api/shorturl', async (request, response) => {
   const { url } = request.body;
@@ -51,13 +38,12 @@ app.post('/api/shorturl', async (request, response) => {
 
   try {
       const parsedUrl = new URL(url);
+      let counter = await Url.countDocuments({}) + 1;
       
       const urlEntry = await Url.create({
         url: parsedUrl.href,
         shortUrl: counter
       });
-      
-      counter++; 
 
       return response.json({
         original_url: urlEntry.url,
