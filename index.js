@@ -1,7 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const validUrl = require('valid-url');
+const { URL } = require('url');
 const app = express();
 
 // Basic Configuration
@@ -10,6 +12,7 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('Error connecting to DB', error))
 
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
 
@@ -41,24 +44,31 @@ initCounter()
 app.post('/api/shorturl', async (request, response) => {
   const { url } = request.body;
 
-  try {
-    const validUrl = new URL(url)
-
-    const urlEntry = await Url.create({
-      url: validUrl.href,
-      shortUrl: counter
-    })
-
-    counter++; 
-
+  if (!validUrl.isWebUri(url))
     return response.json({
-      original_url: urlEntry.url,
-      short_url : urlEntry.shortUrl
+      error: "invalid url"
     })
+
+  try {
+      const parsedUrl = new URL(url);
+      
+      const urlEntry = await Url.create({
+        url: parsedUrl.href,
+        shortUrl: counter
+      });
+      
+      counter++; 
+
+      return response.json({
+        original_url: urlEntry.url,
+        short_url: urlEntry.shortUrl
+      });
+
   } catch (error) {
-    return response.json({ error: "invalid url"})
+    return response.status(500).json({ error: "Oops something's gone wrong" });
   }
 });
+
 
 app.get('/api/shorturl/:short_url', async (request, response) => {
   const { short_url } = request.params;
