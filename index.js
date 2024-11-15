@@ -29,21 +29,23 @@ app.get('/api/:date?', (request, response) => {
 
   if (!date) {
     const currentDate = new Date()
-    return response.json({
+    response.json({
       unix: currentDate.getTime(),
       utc: currentDate.toUTCString(),
     })
     return;
   }
 
-  const parsedDate = new Date(date);
+  const timestamp = !isNaN(date) ? parseInt(date) : date
+  const parsedDate = new Date(timestamp);
   if (!isNaN(parsedDate.getTime())) {
-    return response.json({
+    response.json({
       unix: parsedDate.getTime(),
       utc: parsedDate.toUTCString(),
     })
+    return;
   }
-  response.json({ message: "Invalid date or timestamp not handled yet"})
+  response.json({ message: "Invalid date not handled yet"})
 })
 
 
