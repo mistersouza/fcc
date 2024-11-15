@@ -21,7 +21,12 @@ app.get('/api/hello', function(req, res) {
 
 app.post('/api/shorturl', (request, response) => {
   const { url } = request.body
-
+  
+  if (!url) 
+    return response.json({ error: 'URL is required', status: 400 });
+  if (!(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(url)))
+    return response.json({ error: 'invalid url' })
+  
   response.json({
     original_url: url,
   })
