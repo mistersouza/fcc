@@ -24,6 +24,10 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get('/api/:date?', (request, response) => {
+  response.json({ message: "API's goin'"})
+})
+
 
 
 // Listen on port set in environment variable or default to 3000
