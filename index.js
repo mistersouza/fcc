@@ -25,8 +25,9 @@ app.get('/api/hello', function (req, res) {
 });
 
 app.get('/api/whoami', (request, response) => {
+  const ip = request.headers['x-forwarded-for']
   response.json({
-    headers: request.headers
+    ipaddress: ip,
   })
 })
 // listen for requests :)
