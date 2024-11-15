@@ -20,17 +20,21 @@ app.get('/api/hello', function(req, res) {
 });
 
 app.post('/api/shorturl', (request, response) => {
-  const { url } = request.body
-  
-  if (!url) 
-    return response.json({ error: 'URL is required', status: 400 });
-  if (!(/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(url)))
-    return response.json({ error: 'invalid url' })
-  
-  response.json({
-    original_url: url,
-  })
-})
+  const { url } = request.body;
+
+  if (!url)
+    return response.status(400).json({ error: 'URL is required' });
+
+  try {
+    const cleanUrl = new URL(url).origin
+    return response.json({
+      original_url: cleanUrl,
+    })
+  } catch (error) {
+    return response.json({ error: "Invalid URL"})
+  }
+});
+
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
