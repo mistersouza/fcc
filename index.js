@@ -38,16 +38,14 @@ app.get('/api/:date?', (request, response) => {
 
   const timestamp = !isNaN(date) ? parseInt(date) : date
   const parsedDate = new Date(timestamp);
-  if (!isNaN(parsedDate.getTime())) {
-    response.json({
-      unix: parsedDate.getTime(),
-      utc: parsedDate.toUTCString(),
-    })
-    return;
+  if (isNaN(parsedDate.getTime())) {
+    return response.json({ error: "Invalid Date" });
   }
-  response.json({ message: "Invalid date not handled yet"})
+  response.json({
+    unix: parsedDate.getTime(),
+    utc: parsedDate.toUTCString(),
+  });
 })
-
 
 
 // Listen on port set in environment variable or default to 3000
