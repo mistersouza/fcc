@@ -26,7 +26,7 @@ app.get('/api/hello', function (req, res) {
 
 app.get('/api/whoami', (request, response) => {
   response.json({
-    message: "The endpoint is live and kicking!"
+    headers: request.headers
   })
 })
 // listen for requests :)
