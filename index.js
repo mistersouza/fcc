@@ -1,10 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose')
 const app = express();
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((error) => console.error('Error connecting to DB', error))
 
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
@@ -19,21 +23,37 @@ app.get('/api/hello', function(req, res) {
   res.json({ greeting: 'hello API' });
 });
 
-app.post('/api/shorturl', (request, response) => {
+let Url = require('./models/url');
+let counter = 1;
+
+app.post('/api/shorturl', async (request, response) => {
   const { url } = request.body;
 
-  if (!url)
-    return response.status(400).json({ error: 'URL is required' });
-
   try {
-    const cleanUrl = new URL(url).origin
+    const validUrl = new URL(url)
+
+    const urlEntry = await Url.create({
+      url: validUrl.href,
+      shortUrl: counter
+    })
+
+    counter++; 
+
     return response.json({
-      original_url: cleanUrl,
+      original_url: urlEntry.url,
+      short_url : urlEntry.shortUrl
     })
   } catch (error) {
-    return response.json({ error: "Invalid URL"})
+    return response.json({ error: "invalid url"})
   }
 });
+
+app.get('/api/shorturl/:short_url', (request, response) => {
+  const { short_url } = request.params
+
+  Url.findOne({ shortUrl: short_url })
+
+})
 
 
 app.listen(port, function() {
