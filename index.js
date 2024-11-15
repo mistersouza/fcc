@@ -20,9 +20,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/users', async (request, response) => {
-  return response.json({
-    users: await User.find({}) 
-  })
+  try {
+    const users = await User.find({})
+    return response.json({
+      users,
+      total: await User.countDocuments()
+    })
+  } catch (error) {
+    return response.status(500).json({
+      message: "Failed to retrieve users", error
+    })
+  }
 })
 
 app.post('/api/users', async (request, response) => {
