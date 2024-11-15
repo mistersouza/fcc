@@ -13,14 +13,35 @@ app.use(express.static('public'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+const User = require('./models/user');
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
-app.post('/api/users', (request, response) => {
-  response.json({
-    username: request.body.username
-  })
+app.post('/api/users', async (request, response) => {
+  const { username } = request.body;
+
+  if (!username) {
+    return response.status(400).json({ 
+      message: "We need a username to get you started"
+    })
+  }
+
+  try {
+    const userEntry = await User.findOneAndUpdate(
+      { username },
+      { username },
+      { new: true, upsert: true },
+    )
+
+    return response.json({
+      _id: userEntry._id,
+      username: userEntry.username
+    })
+  } catch (error) {
+    return response.status(500).json({ message: "Oops something's gone wrong" })
+  }
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
