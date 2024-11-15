@@ -60,12 +60,22 @@ app.post('/api/shorturl', async (request, response) => {
   }
 });
 
-app.get('/api/shorturl/:short_url', (request, response) => {
-  const { short_url } = request.params
+app.get('/api/shorturl/:short_url', async (request, response) => {
+  const { short_url } = request.params;
 
-  Url.findOne({ shortUrl: short_url })
+  try {
+    const entry = await Url.findOne({ shortUrl: short_url });
 
-})
+    if (!entry) {
+      return response.status(404).json({ error: 'URL not found' });
+    }
+
+    response.redirect(entry.url);
+  } catch (error) {
+    return response.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 
 app.listen(port, function() {
