@@ -25,7 +25,17 @@ app.get("/api/hello", function (req, res) {
 });
 
 app.get('/api/:date?', (request, response) => {
-  response.json({ message: "API's goin'"})
+  const { date } = request.params
+
+  if (!date) {
+    const currentDate = new Date()
+    response.json({
+      unix: currentDate.getTime(),
+      utc: currentDate.toUTCString(),
+    })
+    return;
+  }
+  response.json({ message: "Date provided, but not handled yet"})
 })
 
 
