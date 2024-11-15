@@ -22,10 +22,7 @@ app.get('/', (req, res) => {
 app.get('/api/users', async (request, response) => {
   try {
     const users = await User.find({})
-    return response.json({
-      users,
-      total: await User.countDocuments()
-    })
+    return response.json(users)
   } catch (error) {
     return response.status(500).json({
       message: "Failed to retrieve users", error
