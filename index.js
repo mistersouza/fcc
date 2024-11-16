@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: true }))
 
 const User = require('./models/user')
 const Exercise = require('./models/exercise')
+const Log = require('./models/log')
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
@@ -58,7 +59,7 @@ app.post('/api/users', async (request, response) => {
 
 app.post('/api/users/:_id/exercises', async (request, response) => {
   const { _id: id } = request.params
-  let { description, duration, date } = request.body; 
+  const { description, duration, date } = request.body; 
 
   if (!description || !duration) {
     return response.status(400).json({ 
@@ -66,20 +67,29 @@ app.post('/api/users/:_id/exercises', async (request, response) => {
     })
   }
 
-  if (!date || date === null) date = Date.now(); 
-
   try {
+    const user = await User.findById(id);
+    if (!user) 
+      return response.status(404).json({message: 'User not found'});
+
     const exerciseEntry = await Exercise.create({
       userId: id,
       description,
       duration,
-      date
+      date: date ? new Date(date) : new Date()
     })
-    return response.json(exerciseEntry)
+    return response.json({
+      _id: user._id,
+      username: user.username,
+      description: exerciseEntry.description,
+      duration: exerciseEntry.duration,
+      date: exerciseEntry.date.toDateString()
+    })
   } catch (error) {
     return response.status(500).json({ message: "Oops something's gone wrong", error })
   }
 })
+
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
