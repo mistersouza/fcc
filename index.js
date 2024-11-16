@@ -109,11 +109,20 @@ app.get('/api/users/:_id/logs', async (request, response) => {
       message: "User not found"
     })
 
-    const { exercises } = await Log.find({ userId })
+    const log = await Log.findOne({ userId }).populate('exercises')
+    if (!log) return response.status(404).json({
+      message: "No exercise logged yet"
+    })
 
     response.json({
-      log: exercises
-    })
+      count: log.count,
+      log: log.exercises.map(exercise => ({
+        description: exercise.description,
+        duration: exercise.duration,
+        date: exercise.date.toDateString()
+      }))
+    });
+
   } catch (error) {
     return response.status(500).json({
       message: "Oops something's gone wrong", error
