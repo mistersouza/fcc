@@ -102,6 +102,7 @@ app.post('/api/users/:_id/exercises', async (request, response) => {
 
 app.get('/api/users/:_id/logs', async (request, response) => {
   const {_id: userId } = request.params
+  const { from, to, limit } = request.query;
 
   try {
     const user = await User.findById(userId); 
@@ -109,7 +110,15 @@ app.get('/api/users/:_id/logs', async (request, response) => {
       message: "User not found"
     })
 
-    const log = await Log.findOne({ userId }).populate('exercises')
+    let log = await Log.findOne({ userId })
+      .populate({
+        path: 'exercises',
+        match: {
+          ...(from && { date: { $gte: new Date(from) } }),
+          ...(to && { date: { $lte: new Date(to) } })
+        },
+        options: { limit: parseInt(limit) || 0}
+    }); 
     if (!log) return response.status(404).json({
       message: "No exercise logged yet"
     })
