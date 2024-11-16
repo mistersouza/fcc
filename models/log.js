@@ -10,7 +10,7 @@ const logSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    exercise: [
+    exercises: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Exercise',

@@ -58,7 +58,7 @@ app.post('/api/users', async (request, response) => {
 })
 
 app.post('/api/users/:_id/exercises', async (request, response) => {
-  const { _id: id } = request.params
+  const { _id: userId } = request.params
   const { description, duration, date } = request.body; 
 
   if (!description || !duration) {
@@ -68,16 +68,26 @@ app.post('/api/users/:_id/exercises', async (request, response) => {
   }
 
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(userId);
     if (!user) 
       return response.status(404).json({message: 'User not found'});
 
     const exerciseEntry = await Exercise.create({
-      userId: id,
+      userId,
       description,
       duration,
       date: date ? new Date(date) : new Date()
-    })
+    });
+
+    await Log.findOneAndUpdate(
+      { userId },
+      {
+        $push: { exercises: exerciseEntry._id },
+        $inc: { count: 1 }
+      },
+      { upsert: true }
+    ); 
+
     return response.json({
       _id: user._id,
       username: user.username,
@@ -90,6 +100,26 @@ app.post('/api/users/:_id/exercises', async (request, response) => {
   }
 })
 
+app.get('/api/users/:_id/logs', async (request, response) => {
+  const {_id: userId } = request.params
+
+  try {
+    const user = await User.findById(userId); 
+    if (!user) return response.status(404).json({
+      message: "User not found"
+    })
+
+    const { exercises } = await Log.find({ userId })
+
+    response.json({
+      log: exercises
+    })
+  } catch (error) {
+    return response.status(500).json({
+      message: "Oops something's gone wrong", error
+    })
+  }
+})
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
