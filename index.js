@@ -5,8 +5,8 @@ const cors = require('cors')
 require('dotenv').config()
 
 mongoose.connect(process.env.MONGO_URI,{})
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(() => console.error('Error connecting to DB'))
+  .then(() => console.log('DB Connected 🚀'))
+  .catch(() => console.error('DB Connection Failed ❌'))
   
 app.use(cors())
 app.use(express.static('public'))
@@ -27,7 +27,7 @@ app.get('/api/users', async (request, response) => {
     return response.json(users)
   } catch (error) {
     return response.status(500).json({
-      message: "Failed to retrieve users", error
+      message: "Whoops, couldn't fetch users 🤖", error
     })
   }
 })
@@ -37,7 +37,7 @@ app.post('/api/users', async (request, response) => {
 
   if (!username) {
     return response.status(400).json({ 
-      message: "We need a username to get you started"
+      message: "Gotta have a username! 💥"
     })
   }
 
@@ -53,7 +53,7 @@ app.post('/api/users', async (request, response) => {
       username: userEntry.username
     })
   } catch (error) {
-    return response.status(500).json({ message: "Oops something's gone wrong" })
+    return response.status(500).json({ message: "Something's off, try again 💀" })
   }
 })
 
@@ -63,14 +63,14 @@ app.post('/api/users/:_id/exercises', async (request, response) => {
 
   if (!description || !duration) {
     return response.status(400).json({ 
-      message: "We need both description and duration to proceed."
+      message: "Missing description or duration 😱"
     })
   }
 
   try {
     const user = await User.findById(userId);
     if (!user) 
-      return response.status(404).json({message: 'User not found'});
+      return response.status(404).json({message: 'User not found. Try again 🔍'});
 
     const exerciseEntry = await Exercise.create({
       userId,
@@ -96,7 +96,7 @@ app.post('/api/users/:_id/exercises', async (request, response) => {
       date: exerciseEntry.date.toDateString()
     })
   } catch (error) {
-    return response.status(500).json({ message: "Oops something's gone wrong", error })
+    return response.status(500).json({ message: "Whoops, error logging exercise 🛑", error })
   }
 })
 
@@ -107,7 +107,7 @@ app.get('/api/users/:_id/logs', async (request, response) => {
   try {
     const user = await User.findById(userId); 
     if (!user) return response.status(404).json({
-      message: "User not found"
+      message: "User not found! Check again 🔎"
     })
 
     let log = await Log.findOne({ userId })
@@ -120,7 +120,7 @@ app.get('/api/users/:_id/logs', async (request, response) => {
         options: { limit: parseInt(limit) || 0}
     }); 
     if (!log) return response.status(404).json({
-      message: "No exercise logged yet"
+      message: "No logs found. Did you exercise today? 🏃‍♂️"
     })
 
     response.json({
@@ -134,12 +134,12 @@ app.get('/api/users/:_id/logs', async (request, response) => {
 
   } catch (error) {
     return response.status(500).json({
-      message: "Oops something's gone wrong", error
+      message: "Something broke, we're on it! ⚡", error
     })
   }
 })
 const listener = app.listen(process.env.PORT || 3000, () => {
-  console.log('Your app is listening on port ' + listener.address().port)
+  console.log('App listening on port ' + listener.address().port + ' 🎧');
 })
 
 
