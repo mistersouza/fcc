@@ -13,7 +13,8 @@ app.use(express.static('public'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-const User = require('./models/user');
+const User = require('./models/user')
+const Exercise = require('./models/exercise')
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
@@ -55,6 +56,30 @@ app.post('/api/users', async (request, response) => {
   }
 })
 
+app.post('/api/users/:_id/exercises', async (request, response) => {
+  const { _id: id } = request.params
+  let { description, duration, date } = request.body; 
+
+  if (!description || !duration) {
+    return response.status(400).json({ 
+      message: "We need both description and duration to proceed."
+    })
+  }
+
+  if (!date || date === null) date = Date.now(); 
+
+  try {
+    const exerciseEntry = await Exercise.create({
+      userId: id,
+      description,
+      duration,
+      date
+    })
+    return response.json(exerciseEntry)
+  } catch (error) {
+    return response.status(500).json({ message: "Oops something's gone wrong", error })
+  }
+})
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
