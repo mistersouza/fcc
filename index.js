@@ -21,9 +21,9 @@ mongoose.connection.once('open', () => {
     bucket = new GridFSBucket(mongoose.connection.db, {
       bucketName: 'uploads'
     });
-    console.log('GridFS bucket initialized');
+    console.log('🛠️ GridFS Bucket Ready to Go! 🚀');
   } catch (error) {
-    console.error('GridFS bucket initialization failed:', error);
+    console.error('⚡️ Something Went Wrong with the GridFS Bucket', error);
   }
 });
 
@@ -47,14 +47,14 @@ app.post('/api/fileanalyse', upload.single('upfile'), async (request, response) 
     const { file } = request;
     
     if (!file) {
-      return response.status(400).json({ error: 'No file uploaded' });
+      return response.status(400).json({ error: '❌ Oops! No file uploaded. Please try again.' });
     }
 
     const cursor = bucket.find({ filename: file.originalname });
     const { length } = await cursor.toArray();
     if (length > 0) {
       return response.status(400).json({
-        error: 'File already exists'
+        error: '🚫 This file is already chilling in our database!'
       });
     }
   
@@ -78,11 +78,12 @@ app.post('/api/fileanalyse', upload.single('upfile'), async (request, response) 
     response.json({
       name: file.originalname,
       type: file.mimetype,
-      size: file.size
+      size: file.size,
+      message: '🔥 File uploaded successfully, and it’s ready to go!'
     });
   } catch (error) {
-    console.error('Uploading file failed:', error);
-    response.status(500).json({ error: 'File upload failed' });
+    response.status(500).json({ error: '⚠️ Something went wrong during upload, please retry!' });
+    // console.error('Uploading the file encountered a problem:', error);
   }
 });
 
