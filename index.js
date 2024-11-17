@@ -42,12 +42,12 @@ app.get('/', function (req, res) {
 });
 
 
-app.post('/api/fileanalyse', upload.single('upfile'), async (req, res) => {
+app.post('/api/fileanalyse', upload.single('upfile'), async (request, response) => {
   try {
-    const { file } = req;
+    const { file } = request;
     
     if (!file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return response.status(400).json({ error: 'No file uploaded' });
     }
 
     const readableStream = new Readable();
@@ -57,16 +57,26 @@ app.post('/api/fileanalyse', upload.single('upfile'), async (req, res) => {
     const uploadStream = bucket.openUploadStream(file.originalname);
     readableStream.pipe(uploadStream);
 
-    res.json({
+    await File.findOneAndUpdate(
+      { gridFSFileId: uploadStream.id },
+      {
+        filename: file.originalname,
+        contentType: file.mimetype,
+        length: file.size
+      }, 
+      { upsert: true }
+    );
+
+    response.json({
       name: file.originalname,
       type: file.mimetype,
       size: file.size
     });
   } catch (error) {
-    res.status(500).json({ error: 'File upload failed' });
+    console.error('Uploading file failed:', error);
+    response.status(500).json({ error: 'File upload failed' });
   }
 });
-
 
 
 const port = process.env.PORT || 3000;
