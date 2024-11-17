@@ -50,6 +50,14 @@ app.post('/api/fileanalyse', upload.single('upfile'), async (request, response) 
       return response.status(400).json({ error: 'No file uploaded' });
     }
 
+    const cursor = bucket.find({ filename: file.originalname });
+    const { length } = await cursor.toArray();
+    if (length > 0) {
+      return response.status(400).json({
+        error: 'File already exists'
+      });
+    }
+  
     const readableStream = new Readable();
     readableStream.push(file.buffer);
     readableStream.push(null);
