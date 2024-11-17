@@ -8,12 +8,15 @@ require('dotenv').config()
 
 const app = express();
 
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log('DB Connected 🚀'))
-.catch((error) => {
-  console.error('DB Connection Failed ❌', error)
-  process.exit(1)
-})
+(async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('DB Connected 🚀');
+  } catch (error) {
+    console.error('DB Connection Failed ❌', error);
+    process.exit(1);
+  }
+})();
 
 let bucket;
 mongoose.connection.once('open', () => {
@@ -83,7 +86,7 @@ app.post('/api/fileanalyse', upload.single('upfile'), async (request, response) 
     });
   } catch (error) {
     response.status(500).json({ error: '⚠️ Something went wrong during upload, please retry!' });
-    // console.error('Uploading the file encountered a problem:', error);
+    // console.error('Uploading the file encountered a problem:e', error);
   }
 });
 
