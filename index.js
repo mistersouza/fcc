@@ -1,8 +1,13 @@
-var express = require('express');
-var cors = require('cors');
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose')
 require('dotenv').config()
 
-var app = express();
+const app = express();
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('DB Connected 🚀'))
+  .catch((error) => console.error('DB Connection Failed ❌', error))
 
 app.use(cors());
 app.use('/public', express.static(process.cwd() + '/public'));
